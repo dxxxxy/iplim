@@ -5,6 +5,13 @@
     "license": "GPL-3.0",
     "description": "Really simple and lightweight ip rate limiter for express.",
     "homepage": "https://github.com/DxxxxY/iplimit",
+    "keywords": [
+        "ip",
+        "rate",
+        "limit",
+        "express",
+        "middleware"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/DxxxxY/iplimit"
