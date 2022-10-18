@@ -2,5 +2,11 @@
     "name": "iplim",
     "version": "1.0.0",
     "author": "dxxxxy",
-    "license": "GPL-3.0"
+    "license": "GPL-3.0",
+    "description": "Really simple and lightweight ip rate limiter for express.",
+    "homepage": "https://github.com/DxxxxY/iplimit",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DxxxxY/iplimit"
+    }
 }
