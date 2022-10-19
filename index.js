@@ -3,6 +3,9 @@ module.exports = options => {
     const ips = new Map()
 
     return (req, res, next) => {
+        //check if path is in exclude
+        if (options.exclude.includes(req.path)) next()
+
         //increment ip count
         ips.set(req.ip, (ips.get(req.ip) || 0) + 1)
 
