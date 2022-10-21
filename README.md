@@ -10,5 +10,5 @@ npm i iplim
 ```js
 const iplim = require("iplim")
 
-app.use(iplim({ cooldown: 10000, limit: 5, exclude: [] }))
+app.use(iplim({ timeout: 1000 * 10 * 15, limit: 15, exclude: ["/hey"], log: true }))
 ```

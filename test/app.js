@@ -1,8 +1,8 @@
 const express = require("express")
 const app = express()
-const iplim = require("iplim")
+const iplim = require("../index")
 
-app.use(iplim({ cooldown: 10000, limit: 5, exclude: ["/hey"] }))
+app.use(iplim({ timeout: 1000 * 10 * 15, limit: 15, exclude: ["/hey"], log: true }))
 
 app.get("/", (req, res) => res.send("Hello World!"))
 
