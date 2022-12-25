@@ -2,10 +2,15 @@ const express = require("express")
 const app = express()
 const iplim = require("../index")
 
-app.use(iplim({ timeout: 1000 * 10 * 15, limit: 15, exclude: ["/hey"], log: true }))
+app.use(express.static("public"))
+app.use(iplim({
+    window: 1000 * 10,
+    timeout: 1000 * 30,
+    exclude: ["/hey"],
+    verbose: true
+}))
 
-app.get("/", (req, res) => res.send("Hello World!"))
-
-app.get("/hey", (req, res) => res.send("Hello World!2"))
+app.get("/hey", (req, res) => res.send("Hello World!")) //not limited
+app.get("/hey2", (req, res) => res.send("Hello World!")) //limited
 
 app.listen(3000)

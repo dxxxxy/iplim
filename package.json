@@ -1,10 +1,10 @@
 {
     "name": "iplim",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "author": "dxxxxy",
     "license": "GPL-3.0",
-    "description": "Really simple and lightweight ip rate limiter for express.",
-    "homepage": "https://github.com/DxxxxY/iplimit",
+    "description": "A really simple and lightweight ip rate limiter for express.",
+    "homepage": "https://github.com/DxxxxY/iplim",
     "keywords": [
         "ip",
         "rate",
@@ -14,6 +14,6 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/DxxxxY/iplimit"
+        "url": "https://github.com/DxxxxY/iplim"
     }
 }
