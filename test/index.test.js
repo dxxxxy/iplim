@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import iplim from "../index.js"
 
-const config = { limit: 2, window: 1000, timeout: 2000, exclude: "/exclude", verbose: true }
+const config = { limit: 2, window: 1000, timeout: 2000, exclude: ["/exclude"], verbose: true }
 
 describe("iplim - Rate Limiter Middleware for Express.js", () => {
     test("should skip requests with path exclusion", () => {

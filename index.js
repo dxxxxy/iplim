@@ -14,12 +14,12 @@ module.exports = ({
     }
 
     return (req, res, next) => {
-        const ip = req.ip
+        const ip = req.ip || req.connection?.remoteAddress || "unknown"
 
         if (verbose) console.log(`\n---------<${ip}>---------`)
 
         //if path is excluded, skip rate limiting
-        if (req.path.startsWith(exclude)) {
+        if (exclude.some(excludedPath => req.path.startsWith(excludedPath))) {
             log(`${req.path} is excluded. Skipping.`)
             return next()
         }
@@ -52,7 +52,7 @@ module.exports = ({
             record.timer = setTimeout(() => {
                 store.delete(ip)
                 log(`---[${ip}] Timeout has been cleared [${ip}]---`)
-            }, timeout)
+            }, timeout).unref() //unref so it does not keep the process alive
 
             return res.status(statusCode).send(message)
         }
@@ -63,7 +63,7 @@ module.exports = ({
             record.timer = setTimeout(() => {
                 store.delete(ip)
                 log(`---[${ip}] Window has been cleared. [${ip}]---`)
-            }, window)
+            }, window).unref() //unref so it does not keep the process alive
         }
 
         log("Continuing request.")
