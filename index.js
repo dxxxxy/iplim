@@ -1,81 +1,72 @@
 module.exports = ({
-    timeout = 1000 * 60 * 15, //milliseconds the user has to wait after breaching the rules set
-    limit = 15, //number of requests allowed in the window
-    window = 1000 * 60, //milliseconds the limit has to reach (ex: 15 requests in 1 minute)
-    exclude = [], //exclude paths in this array from the limit (ex: "/hey")
-    verbose = false, //print every process step to the console
-}) => {
-    //map initialization
+    timeout = 1000 * 60, //milliseconds of timeout when limit is exceeded
+    limit = 15,//number of requests allowed within the window
+    window = 1000 * 60, //milliseconds of the window for counting requests
+    exclude = [], //array of paths to exclude from rate limiting
+    statusCode = 429, //HTTP status code to send when rate limit is exceeded
+    message = "Too many requests", //message to send when rate limit is exceeded
+    verbose = false, //whether to log detailed information about requests and rate limiting decisions
+} = {}) => {
     const store = new Map()
-    const toReset = []
-    const onTimeout = []
+
+    const log = (msg) => {
+        if (verbose) console.log(msg)
+    }
 
     return (req, res, next) => {
-        const delimit = () => {
-            if (verbose) console.log(`\n---------<${req.ip}>---------`)
-        }
+        const ip = req.ip
 
-        const log = (msg) => {
-            if (verbose) console.log(msg)
-        }
+        if (verbose) console.log(`\n---------<${ip}>---------`)
 
-        //start
-        delimit()
-
-        //check if path is in exclude
-        if (exclude.includes(req.path)) {
+        //if path is excluded, skip rate limiting
+        if (req.path.startsWith(exclude)) {
             log(`${req.path} is excluded. Skipping.`)
-            return next() //continue the request
+            return next()
         }
 
-        //increment ip count
-        store.set(req.ip, (store.get(req.ip) || 0) + 1)
-        log(`Count: ${store.get(req.ip)}, Limit: ${limit}`)
-
-        //check if ip count is greater than limit
-        if (store.get(req.ip) > limit) {
-            log("Over Limit.")
-
-            //check if ip is already on timeout
-            if (!onTimeout.includes(req.ip)) {
-                onTimeout.push(req.ip)
-
-                //clear ip count after timeout (long wait)
-                setTimeout(() => {
-                    store.delete(req.ip)
-                    onTimeout.splice(onTimeout.indexOf(req.ip), 1)
-                    log(`---[${req.ip}] Timeout has been cleared [${req.ip}]---`)
-                }, timeout)
-
-                log(`└──Set timeout to ${timeout}ms. Sending 429.`)
-
-                //remove from to be reset
-                toReset.splice(toReset.indexOf(req.ip), 1)
-            } else {
-                log(`└──Already on timeout. Sending 429.`)
-            }
-
-            res.status(429).send("Too many requests")
-        } else {
-            log(`Under limit.`)
-
-            //set to reset ip count after cooldown (so it doenst keep counting till limit)
-            if (!toReset.includes(req.ip)) {
-                toReset.push(req.ip)
-
-                setTimeout(() => {
-                    if (onTimeout.includes(req.ip)) return
-                    store.set(req.ip, 0)
-                    toReset.splice(toReset.indexOf(req.ip), 1)
-                    log(`---[${req.ip}] Window has been cleared. [${req.ip}]---`)
-                }, window)
-
-                log(`└──First request in window. Count will reset in ${window}ms.`)
-            }
-
-            //continue request
-            log("└──Continuing request.")
-            next()
+        //get record or initialize
+        let record = store.get(ip)
+        if (!record) {
+            record = { count: 0, timer: null, isTimeout: false }
+            store.set(ip, record)
         }
+
+        //if ip is in timeout, reject request
+        if (record.isTimeout) {
+            log(`In timeout. Sending ${statusCode} - ${message}.`)
+            return res.status(statusCode).send(message)
+        }
+
+        record.count++
+        log(`Count: ${record.count}, Limit: ${limit}`)
+
+        //if count exceeds limit, trigger timeout
+        if (record.count > limit) {
+            log(`Setting timeout to ${timeout}ms. Sending ${statusCode} - ${message}.`)
+            record.isTimeout = true
+
+            //clear existing window timer
+            if (record.timer) clearTimeout(record.timer)
+
+            //start timeout cooldown
+            record.timer = setTimeout(() => {
+                store.delete(ip)
+                log(`---[${ip}] Timeout has been cleared [${ip}]---`)
+            }, timeout)
+
+            return res.status(statusCode).send(message)
+        }
+
+        //start window cooldown timer on first request
+        if (record.count === 1) {
+            log(`First request in window. Count will reset in ${window}ms.`)
+            record.timer = setTimeout(() => {
+                store.delete(ip)
+                log(`---[${ip}] Window has been cleared. [${ip}]---`)
+            }, window)
+        }
+
+        log("Continuing request.")
+        next()
     }
 }
