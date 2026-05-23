@@ -5,7 +5,7 @@ A really simple and lightweight ip rate limiter for express.
 - Zero production dependencies.
 - Extensive testing with 100% code coverage.
 - Optimized for performance with O(1) lookups.
-- Lots of customization options.
+- Customizable options for flexibility.
 
 ## Install
 ```
@@ -16,7 +16,7 @@ npm i iplim
 ```js
 const iplim = require("iplim")
 
-app.use(iplim({ options }))
+app.use(iplim({ /* options */ }))
 ```
 
 ### Options
