@@ -1,6 +1,6 @@
 export default ({
     timeout = 1000 * 60, //milliseconds of timeout when limit is exceeded
-    limit = 15,//number of requests allowed within the window
+    limit = 15, //number of requests allowed within the window
     window = 1000 * 60, //milliseconds of the window for counting requests
     exclude = [], //array of paths to exclude from rate limiting
     statusCode = 429, //HTTP status code to send when rate limit is exceeded
@@ -19,7 +19,7 @@ export default ({
         if (verbose) console.log(`\n---------<${ip}>---------`)
 
         //if path is excluded, skip rate limiting
-        if (exclude.some(excludedPath => req.path.startsWith(excludedPath))) {
+        if (exclude.some(excludedPath => req.path === excludedPath)) {
             log(`${req.path} is excluded. Skipping.`)
             return next()
         }
@@ -34,7 +34,7 @@ export default ({
         //if ip is in timeout, reject request
         if (record.isTimeout) {
             log(`In timeout. Sending ${statusCode} - ${message}.`)
-            return res.status(statusCode).send(message)
+            return res.status(statusCode).json({ message })
         }
 
         record.count++
@@ -54,7 +54,7 @@ export default ({
                 log(`---[${ip}] Timeout has been cleared [${ip}]---`)
             }, timeout).unref() //unref so it does not keep the process alive
 
-            return res.status(statusCode).send(message)
+            return res.status(statusCode).json({ message })
         }
 
         //start window cooldown timer on first request

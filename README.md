@@ -24,7 +24,7 @@ app.use(iplim({ /* options */ }))
 
 ```js
 timeout = 1000 * 60, //milliseconds of timeout when limit is exceeded
-limit = 15,//number of requests allowed within the window
+limit = 15, //number of requests allowed within the window
 window = 1000 * 60, //milliseconds of the window for counting requests
 exclude = [], //array of paths to exclude from rate limiting
 statusCode = 429, //HTTP status code to send when rate limit is exceeded
