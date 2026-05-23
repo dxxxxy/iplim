@@ -1,7 +1,7 @@
 {
     "name": "iplim",
     "type": "module",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "author": "dxxxxy",
     "license": "GPL-3.0",
     "description": "A really simple and lightweight ip rate limiter for express.",
