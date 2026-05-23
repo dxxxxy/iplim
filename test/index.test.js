@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest"
 import iplim from "../index.js"
 
-const config = { limit: 2, window: 1000, timeout: 2000, exclude: ["/exclude"], verbose: true }
+const config = { timeout: 2000, limit: 2, window: 1000, exclude: ["/exclude"], statusCode: 429, message: "Too many requests", verbose: true }
 
 describe("iplim - Rate Limiter Middleware for Express.js", () => {
     test("should use req.connection.remoteAddress if req.ip is missing", () => {
@@ -73,7 +73,7 @@ describe("iplim - Rate Limiter Middleware for Express.js", () => {
         expect(next).toHaveBeenCalledTimes(2)
 
         //wait for the window to reset (1000ms) and then call again, which should pass since the window cleared
-        vi.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(config.window)
         middleware(req, res, next)
 
         expect(res.status).not.toHaveBeenCalled()
@@ -94,15 +94,15 @@ describe("iplim - Rate Limiter Middleware for Express.js", () => {
         middleware(req, res, next)
         middleware(req, res, next)
 
-        expect(res.status).toHaveBeenCalledWith(429)
-        expect(res.send).toHaveBeenCalledWith("Too many requests")
+        expect(res.status).toHaveBeenCalledWith(config.statusCode)
+        expect(res.send).toHaveBeenCalledWith(config.message)
         expect(next).toHaveBeenCalledTimes(2)
 
         //call again while in timeout, which should still be blocked
         middleware(req, res, next)
 
         //wait for the timeout to clear (2000ms) and then call again, which should pass since the timeout cleared
-        vi.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(config.timeout)
         middleware(req, res, next)
 
         expect(next).toHaveBeenCalledTimes(3)
